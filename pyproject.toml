@@ -1,0 +1,20 @@
+
+[project]
+name = "compassstep-ai"
+version = "0.1.0"
+description = "HiO"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.116.2",
+    "google-api-python-client>=2.182.0",
+    "pycountry>=24.6.1",
+    "pylast>=5.5.0",
+    "python-dotenv>=1.1.1",
+    "requests>=2.32.5",
+    "uvicorn>=0.35.0",
+]
+
+[dependency-groups]
+dev = [
+]

@@ -1,0 +1,14 @@
+# 유틸 패키지
+requests # HTTP 요청을 위한 패키지 / 김현준 / 25.09.17
+python-dotenv # 환경변수를 불러오기 위한 패키지 / 김현준 / 25.09.17
+
+# fastapi 관련 패키지
+fastapi # 김현준 / 25.09.17
+uvicorn # 김현준 / 25.09.17
+
+# Langchain 관련 패키지
+
+# 레퍼런스 탐색 관련 패키지
+pylast # last.fm API를 호출하기 위해 필요 / 김현준 / 25.09.17
+google-api-python-client # Youtube API를 호출하기 위해 필요 / 김현준 / 25.09.17
+pycountry # 국가의 정식 영문 명칭을 받아오기 위해 필요 / 김현준 / 25.09.17
