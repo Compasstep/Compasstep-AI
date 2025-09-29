@@ -218,3 +218,6 @@ config.yml
 *.pyc
 .python-version
 uv.lock
+
+# log
+logs/*.log

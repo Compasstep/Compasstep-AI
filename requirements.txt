@@ -7,6 +7,7 @@ fastapi # 김현준 / 25.09.17
 uvicorn # 김현준 / 25.09.17
 
 # Langchain 관련 패키지
+langchain-openai # openai 모델을 사용하기 위한 패키지 / 김현준 / 25.09.21
 
 # 레퍼런스 탐색 관련 패키지
 pylast # last.fm API를 호출하기 위해 필요 / 김현준 / 25.09.17
