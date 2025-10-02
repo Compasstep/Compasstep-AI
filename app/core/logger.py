@@ -96,6 +96,17 @@ def setup_logging() -> None:
         lg = logging.getLogger(name)
         _attach_handlers(lg, (console_handler, file_handler), level)
 
+    # 외부 라이브러리 로거 레벨 조정 (DEBUG flood 방지)
+    noisy_libs = [
+        "httpx",
+        "httpcore",
+        "urllib3",
+        "openai",
+        "langchain",
+        "langsmith",
+    ]
+    for lib in noisy_libs:
+        logging.getLogger(lib).setLevel(logging.WARNING)  # 필요 시 INFO or ERROR
 
 def get_logger(name: str) -> logging.Logger:
     """

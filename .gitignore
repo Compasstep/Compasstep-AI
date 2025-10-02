@@ -221,3 +221,7 @@ uv.lock
 
 # log
 logs/*.log
+
+# docker, sql
+/postgres/
+docker-compose.yml

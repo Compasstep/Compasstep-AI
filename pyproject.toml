@@ -8,8 +8,13 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.116.2",
     "google-api-python-client>=2.182.0",
+    "langchain>=0.3.27",
+    "langchain-core>=0.3.76",
     "langchain-openai>=0.3.33",
+    "openai>=1.108.1",
+    "psycopg[binary]>=3.2.10",
     "pycountry>=24.6.1",
+    "pydantic>=2.11.9",
     "pylast>=5.5.0",
     "python-dotenv>=1.1.1",
     "requests>=2.32.5",
