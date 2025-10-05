@@ -1,6 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-SYSTEM_MSG = SYSTEM_MSG = """
+SYSTEM_MSG = """
 You are an AI assistant designed to help musicians discover and explore musical references. 
 Your primary role is to support creative work by guiding artists toward useful inspirations.
 
