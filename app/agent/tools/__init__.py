@@ -1,6 +1,6 @@
 from .guardrails import moderation_tool
 from .tag_tracks import TagTracks
-# from .artist_tracks import ArtistTracks
+from .artist_tracks import ArtistTracks
 # from .country_tracks import CountryTracks
 # from .global_tracks import GlobalTracks
 # from .similar_artists import SimilarArtists
@@ -9,7 +9,7 @@ from .tag_tracks import TagTracks
 TOOLS = [
     moderation_tool,
     TagTracks.get_tracks_by_tag,
-    # ArtistTracks.get_top_tracks_by_artist,
+    ArtistTracks.get_top_tracks_by_artist,
     # CountryTracks.get_top_tracks_by_country,
     # GlobalTracks.get_global_top_tracks,
     # SimilarArtists.get_similar_artists,
