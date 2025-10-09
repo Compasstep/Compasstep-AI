@@ -27,5 +27,5 @@ def moderation_tool(category: str) -> dict:
     """
     return {
         "message": CUSTOM_MESSAGES.get(category, "규칙 위반이 감지되었습니다."),
-        "is_guardrail": True,
+        "is_guardrailed": True,  # ← 키 통일: ed 붙이기
     }
