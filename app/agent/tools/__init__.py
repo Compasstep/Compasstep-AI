@@ -4,7 +4,7 @@ from .tag_tracks import TagTracks
 # from .country_tracks import CountryTracks
 # from .global_tracks import GlobalTracks
 # from .similar_artists import SimilarArtists
-# from .similar_tracks import SimilarTracks
+from .similar_tracks import SimilarTracks
 
 TOOLS = [
     moderation_tool,
@@ -13,7 +13,7 @@ TOOLS = [
     # CountryTracks.get_top_tracks_by_country,
     # GlobalTracks.get_global_top_tracks,
     # SimilarArtists.get_similar_artists,
-    # SimilarTracks.get_similar_tracks,
+    SimilarTracks.get_similar_tracks,
 ]
 
 __all__ = ["TOOLS"]
