@@ -25,7 +25,8 @@ class GlobalTracks:
         MusicUtils.rate_limit()
 
         try:
-            top_tracks = MusicUtils._network.get_top_tracks(limit=GlobalTracks._default_limit)
+            network = MusicUtils.get_network()
+            top_tracks = network.get_top_tracks(limit=GlobalTracks._default_limit)
         except Exception as e:
             logger.error(f"Failed to fetch global top tracks: {e}")
             return []
