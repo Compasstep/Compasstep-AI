@@ -33,7 +33,8 @@ class SimilarArtists:
             return []
 
         try:
-            artist_obj = MusicUtils._network.get_artist(artist.strip())
+            network = MusicUtils.get_network()
+            artist_obj = network.get_artist(artist.strip())
             similar_artists = artist_obj.get_similar(limit=SimilarArtists._default_limit)
         except Exception as e:
             logger.error(f"Failed to fetch similar artists for '{artist}': {e}")
