@@ -29,7 +29,8 @@ class SimilarTracks:
             return []
 
         try:
-            track_obj = MusicUtils._network.get_track(artist.strip(), track.strip())
+            network = MusicUtils.get_network()
+            track_obj = network.get_track(artist.strip(), track.strip())
             similar_tracks = track_obj.get_similar(limit=SimilarTracks._default_limit)
         except Exception as e:
             logger.error(f"Failed to fetch similar tracks for '{artist} - {track}': {e}")
