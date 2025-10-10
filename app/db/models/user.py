@@ -18,8 +18,8 @@ class User(Base, TimestampMixin):
     name = Column(String(255), nullable=False)
     nickname = Column(String(255), nullable=False)
     s3file_image = Column(String(255), nullable=True)
-    status = Column(String(255), nullable=False, server_default=text("'NORMAL'"))
+    status = Column(String(255), nullable=True, server_default=text("'NORMAL'"))
     status_reason = Column(String(255), nullable=True)
-    is_deleted = Column(Boolean, nullable=False, server_default=text("false"))
+    is_deleted = Column(Boolean, nullable=True, server_default=text("false"))
 
     __table_args__ = (STATUS_CHECK,)
