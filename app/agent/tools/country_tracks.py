@@ -28,7 +28,8 @@ class CountryTracks:
             return []
 
         try:
-            top_tracks = MusicUtils._network.get_geo_top_tracks(country=country.strip(), limit=CountryTracks._default_limit)
+            network = MusicUtils.get_network()
+            top_tracks = network.get_geo_top_tracks(country=country.strip(), limit=CountryTracks._default_limit)
         except Exception as e:
             logger.error(f"Failed to fetch top tracks for country '{country}': {e}")
             return []
