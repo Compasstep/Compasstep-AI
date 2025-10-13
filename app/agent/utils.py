@@ -82,17 +82,116 @@ class MusicUtils:
         return f"https://www.youtube.com/watch?v={vid}" if vid else None
 
     @classmethod
-    def format_track_info(cls, track: pylast.Track) -> Dict[str, str]:
-        """Last.fm Track 객체를 표준 dict 형태로 변환"""
+    def get_youtube_thumbnail_urls(cls, video_id: str) -> Dict[str, str]:
+        """
+        주어진 YouTube video_id에 대한 썸네일 URL 모음 반환.
+        일부 영상은 sd/maxres가 없을 수 있으니, 사용처에서 Fallback 순서를 정해 쓰세요.
+        """
+        base = f"https://i.ytimg.com/vi/{video_id}"
+        return {
+            "default": f"{base}/default.jpg",     # 120x90
+            "mq": f"{base}/mqdefault.jpg",        # 320x180
+            "hq": f"{base}/hqdefault.jpg",        # 480x360
+            "sd": f"{base}/sddefault.jpg",        # 640x480 (없을 수 있음)
+            "maxres": f"{base}/maxresdefault.jpg" # 1280x720 (없을 수 있음)
+        }
+
+    @classmethod
+    def get_youtube_basic_info(cls, query: str) -> Optional[Dict[str, str]]:
+        """
+        검색 쿼리로 YouTube Data API(search.list, part=snippet)를 호출해
+        videoId, title, channelName, thumbnailUrl, youtubeUrl 을 1개 반환.
+        """
+        if not cls._youtube_api_key:
+            logger.warning("YOUTUBE_API_KEY not configured. Skipping YouTube search.")
+            return None
+
+        cls.rate_limit()
         try:
-            artist_name = track.get_artist().get_name()
-            title = track.get_title()
-            query = f"{artist_name} - {title}"
+            params = {
+                "part": "snippet",
+                "q": query,
+                "key": cls._youtube_api_key,
+                "type": "video",
+                "maxResults": 1,
+                "safeSearch": "none",
+            }
+            resp = requests.get("https://www.googleapis.com/youtube/v3/search", params=params)
+            resp.raise_for_status()
+            data = resp.json()
+            items = data.get("items") or []
+            if not items:
+                return None
+
+            item = items[0]
+            vid = item["id"]["videoId"]
+            snip = item.get("snippet") or {}
+            thumbs = snip.get("thumbnails") or {}
+
+            def _pick(d): return (d or {}).get("url")
+            thumbnail_url = (
+                _pick(thumbs.get("maxres"))
+                or _pick(thumbs.get("standard"))
+                or _pick(thumbs.get("high"))
+                or _pick(thumbs.get("medium"))
+                or _pick(thumbs.get("default"))
+                or ""
+            )
+
             return {
-                "artist": artist_name,
-                "title": title,
-                "url": cls.get_youtube_url(query) or track.get_url()
+                "videoId": vid,
+                "title": snip.get("title", ""),
+                "channelName": snip.get("channelTitle", ""),
+                "thumbnailUrl": thumbnail_url,
+                "youtubeUrl": f"https://www.youtube.com/watch?v={vid}",
             }
         except Exception as e:
+            logger.error(f"YouTube basic info failed for query '{query}': {e}")
+            return None
+
+    @classmethod
+    def format_track_info(cls, track: pylast.Track) -> Dict[str, str]:
+        """
+        Last.fm Track → 요구 스키마:
+        { videoId, title, channelName, thumbnailUrl, youtubeUrl }
+        """
+        try:
+            artist_name = track.get_artist().get_name()
+            track_title = track.get_title()
+            query = f"{artist_name} - {track_title}"
+
+            # 1순위: YouTube snippet 기반 정확 정보
+            yt = cls.get_youtube_basic_info(query)
+            if yt:
+                return yt
+
+            # 2순위: videoId + 정적 썸네일로 최소 구성
+            vid = cls.get_youtube_video_id(query)
+            if vid:
+                thumbs = cls.get_youtube_thumbnail_urls(vid)
+                return {
+                    "videoId": vid,
+                    "title": f"{artist_name} - {track_title}",
+                    "channelName": "",
+                    "thumbnailUrl": thumbs.get("hq") or thumbs.get("mq") or thumbs.get("default") or "",
+                    "youtubeUrl": f"https://www.youtube.com/watch?v={vid}",
+                }
+
+            # 3순위: 전혀 못 찾았을 때 안전값
+            return {
+                "videoId": "",
+                "title": f"{artist_name} - {track_title}",
+                "channelName": "",
+                "thumbnailUrl": "",
+                "youtubeUrl": "",
+            }
+
+        except Exception as e:
             logger.error(f"Error formatting track info: {e}")
-            return {"artist": "Unknown", "title": "Unknown", "url": ""}
+            return {
+                "videoId": "",
+                "title": "Unknown",
+                "channelName": "",
+                "thumbnailUrl": "",
+                "youtubeUrl": "",
+            }

@@ -24,9 +24,11 @@ class TagTracks:
         - tag: The music tag (e.g., "upbeat"). Only one tag should be entered.
 
         Returns:
-        A list of track information [{"artist": "artist_name", "title": "track_title", "url": "link"}, ...].
+        [
+          {"videoId","title","channelName","thumbnailUrl","youtubeUrl"},
+          ...
+        ]
         """
-
         MusicUtils.initialize_lastfm()
         MusicUtils.rate_limit()
 
@@ -42,14 +44,14 @@ class TagTracks:
             logger.error(f"Failed to fetch tracks for tag '{tag}': {e}")
             return []
 
-        results = []
+        results: List[Dict[str, str]] = []
         for wrapper in top_tracks:
             try:
-                track_info = MusicUtils.format_track_info(wrapper.item)
-                if track_info["artist"] != "Unknown":
-                    results.append(track_info)
+                info = MusicUtils.format_track_info(wrapper.item)
+                # 필요하면 필터링 유지 가능 (예: Unknown 제거)
+                if info.get("title"):
+                    results.append(info)
             except Exception as e:
                 logger.error(f"Error processing track for tag '{tag}': {e}")
-                continue
-
         return results
+

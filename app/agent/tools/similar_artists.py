@@ -26,23 +26,15 @@ class SimilarArtists:
 
         Parameters:
         - artist: The seed artist name (e.g., "BTS").
-        - similar_limit: How many similar artists to fetch (default: 3).
+        - similar_limit: How many similar artists to fetch (default: 4).
         - tracks_per_artist: How many top tracks per similar artist to include.
           If 0, only similar artist names are returned.
 
         Returns:
-        - If tracks_per_artist == 0:
-            [{"artist": "<similar_artist_name>"}]
-        - Otherwise:
-            [
-              {
-                "source_artist": "<seed>",
-                "similar_artist": "<name>",
-                "title": "<track_title>",
-                "url": "<lastfm_track_url>"
-              },
-              ...
-            ]
+        [
+          {"videoId","title","channelName","thumbnailUrl","youtubeUrl"},
+          ...
+        ]
         """
         MusicUtils.initialize_lastfm()
         MusicUtils.rate_limit()
@@ -52,6 +44,7 @@ class SimilarArtists:
             return []
 
         seed = artist.strip()
+        k = max(1, int(tracks_per_artist))  # 스키마 통일을 위해 최소 1로 강제
 
         # 1) 유사 아티스트 조회
         try:
@@ -62,20 +55,9 @@ class SimilarArtists:
             logger.error(f"Failed to fetch similar artists for '{seed}': {e}")
             return []
 
-        # 2) tracks_per_artist == 0 이면 아티스트 이름만 반환 (기존 동작 유지)
-        if int(tracks_per_artist) <= 0:
-            only_artists: List[Dict[str, str]] = []
-            for w in similar_wrappers:
-                try:
-                    only_artists.append({"artist": w.item.get_name()})
-                except Exception as e:
-                    logger.error(f"Error processing similar artist for '{seed}': {e}")
-                    continue
-            return only_artists
-
-        # 3) 각 유사 아티스트별 상위 트랙 조회 (ArtistTracks.fetch_top_tracks_by_artist 재사용)
+        # 2) 각 유사 아티스트별 상위 트랙 수집 (ArtistTracks의 순수 함수 재사용)
         results: List[Dict[str, str]] = []
-        seen = set()  # (similar_artist, title) 중복 제거
+        seen = set()  # (videoId) 중복 제거
 
         for w in similar_wrappers:
             try:
@@ -86,28 +68,18 @@ class SimilarArtists:
 
             try:
                 MusicUtils.rate_limit()
-                tracks = ArtistTracks.fetch_top_tracks_by_artist(sim_name, limit=int(tracks_per_artist))
+                tracks = ArtistTracks.fetch_top_tracks_by_artist(sim_name, limit=k)
             except Exception as e:
                 logger.error(f"Failed to get tracks for similar artist '{sim_name}': {e}")
                 continue
 
             for t in tracks:
                 try:
-                    title = t.get("title")
-                    url = t.get("url")
-                    key = (sim_name, title)
-                    if key in seen:
+                    vid = t.get("videoId", "")
+                    if not vid or vid in seen:
                         continue
-                    seen.add(key)
-
-                    results.append({
-                        "source_artist": seed,
-                        "similar_artist": sim_name,
-                        "title": title,
-                        "url": url,
-                    })
+                    seen.add(vid)
+                    results.append(t)  # 이미 통일 스키마
                 except Exception as e:
                     logger.error(f"Error processing track for '{sim_name}': {e}")
-                    continue
-
         return results

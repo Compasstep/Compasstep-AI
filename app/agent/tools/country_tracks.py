@@ -14,11 +14,19 @@ class CountryTracks:
         """
         Retrieves the top popular tracks for a specific country.
 
-        Parameters:
-        - country: The English name of the country (e.g., "South Korea", "Japan", "Brazil").
+        Assumption
+        - The caller extracts the country from the user's query and normalizes it to an
+          ISO 3166-1 official English short name (e.g., "Korea, Republic of", "United States")
+          BEFORE calling this function.
 
+        Parameters
+        - country (str): ISO 3166-1 official English short name.
+          Examples: "Korea, Republic of", "United States", "United Kingdom", "Viet Nam".
         Returns:
-        A list of track information [{"artist": "artist_name", "title": "track_title", "url": "link"}, ...].
+        [
+          {"videoId","title","channelName","thumbnailUrl","youtubeUrl"},
+          ...
+        ]
         """
         MusicUtils.initialize_lastfm()
         MusicUtils.rate_limit()
@@ -29,18 +37,18 @@ class CountryTracks:
 
         try:
             network = MusicUtils.get_network()
-            top_tracks = network.get_geo_top_tracks(country=country.strip(), limit=CountryTracks._default_limit)
+            top_tracks = network.get_geo_top_tracks(
+                country=country.strip(),
+                limit=CountryTracks._default_limit
+            )
         except Exception as e:
             logger.error(f"Failed to fetch top tracks for country '{country}': {e}")
             return []
 
-        results = []
+        results: List[Dict[str, str]] = []
         for wrapper in top_tracks:
             try:
-                track_info = MusicUtils.format_track_info(wrapper.item)
-                results.append(track_info)
+                results.append(MusicUtils.format_track_info(wrapper.item))
             except Exception as e:
                 logger.error(f"Error processing track for country '{country}': {e}")
-                continue
-
         return results
