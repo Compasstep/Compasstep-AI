@@ -7,7 +7,7 @@ from app.agent.utils import MusicUtils
 logger = get_logger("app.agent.tools.artist_tracks")
 
 class ArtistTracks:
-    _default_limit = 3
+    _default_limit = 4
 
     @staticmethod
     @lru_cache(maxsize=512)

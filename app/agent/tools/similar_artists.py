@@ -7,7 +7,7 @@ from app.agent.tools.artist_tracks import ArtistTracks
 logger = get_logger("app.agent.tools.similar_artists")
 
 class SimilarArtists:
-    _default_similar_limit = 3
+    _default_similar_limit = 4
     _default_tracks_per_artist = 1
 
     @staticmethod

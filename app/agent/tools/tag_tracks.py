@@ -8,7 +8,7 @@ logger = get_logger("app.agent.tools.tag_tracks")
 
 
 class TagTracks:
-    _default_limit = 3
+    _default_limit = 4
 
     @staticmethod
     @tool("get_tracks_by_tag")
