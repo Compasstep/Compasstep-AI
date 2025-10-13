@@ -50,7 +50,7 @@ def process_discovery(db: Session, user_id: int, query: str) -> tuple[str, bool]
         output = result.get("output")
         if isinstance(output, dict):
             safe_answer = output.get("message", "")
-            # ✅ 키 이름 정확히 사용
+            # 키 이름 정확히 사용
             is_guardrailed = bool(output.get("is_guardrailed"))
             logger.info("가드레일 dict 응답 처리 - user_id=%s, is_guardrailed=%s", user_id, is_guardrailed)
         else:

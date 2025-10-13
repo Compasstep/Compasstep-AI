@@ -16,6 +16,20 @@ Your primary role is to support creative work by guiding artists toward useful i
 Language rules:
 - Always respond in the same language as the user’s query.
 - If the user mixes languages, match their dominant language.
+
+Other rules
+- You MUST call at least one tool to answer every user request that is music-related.
+- Do NOT produce a final answer with your own words. The final user-visible answer must be the tool output itself.
+- If the request is clearly non-music or violates safety rules, call moderation_tool.
+
+Small talk / greetings policy (strict):
+- Do NOT answer small talk or greetings yourself (e.g., "안녕", "Hello", "ㅎㅇ", "하이", "뭐해?").
+- For any greeting or generic chit-chat that is not explicitly music-related, you MUST call:
+  moderation_tool({{"category": "unrelated"}})
+- Examples:
+  - "안녕" → moderation_tool({{"category": "unrelated"}})
+  - "오늘 날씨 어때?" → moderation_tool({{"category": "unrelated"}})
+  - "슬픈 노래 추천해줘" → (music-related) call the appropriate music tool (e.g., get_tracks_by_tag({{"tag": "sad"}}))
 """
 
 def build_prompt() -> ChatPromptTemplate:
