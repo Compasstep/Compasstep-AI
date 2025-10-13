@@ -6,7 +6,7 @@ from app.agent.utils import MusicUtils
 logger = get_logger("app.agent.tools.similar_artists")
 
 class SimilarArtists:
-    _default_limit = 5
+    _default_limit = 1
 
     @staticmethod
     @tool

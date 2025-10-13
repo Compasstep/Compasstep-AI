@@ -6,7 +6,7 @@ from app.agent.utils import MusicUtils
 logger = get_logger("app.agent.tools.global_tracks")
 
 class GlobalTracks:
-    _default_limit = 5
+    _default_limit = 3
 
     @staticmethod
     @tool
