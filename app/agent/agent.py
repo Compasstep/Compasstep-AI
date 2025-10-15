@@ -22,4 +22,5 @@ def build_agent_executor(model: str = AI_MODEL, temperature: float = 0.0) -> Age
         handle_parsing_errors=True,
         max_iterations=6,
         max_execution_time=20,
+        return_intermediate_steps=True,
     )

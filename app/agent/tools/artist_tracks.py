@@ -7,7 +7,7 @@ from app.agent.utils import MusicUtils
 logger = get_logger("app.agent.tools.artist_tracks")
 
 class ArtistTracks:
-    _default_limit = 3
+    _default_limit = 4
 
     @staticmethod
     @lru_cache(maxsize=512)
@@ -15,6 +15,17 @@ class ArtistTracks:
         """
         재사용 가능한 순수 로직 함수
         - 다른 툴/서비스/라우터에서 직접 호출 가능
+
+        Returns:
+          [
+            {
+              "videoId": str,
+              "title": str,          # YouTube 제목
+              "channelName": str,
+              "thumbnailUrl": str,
+              "youtubeUrl": str
+            }, ...
+          ]
         """
         MusicUtils.initialize_lastfm()
         MusicUtils.rate_limit()
@@ -36,7 +47,7 @@ class ArtistTracks:
         results: List[Dict[str, str]] = []
         for wrapper in top_tracks:
             try:
-                info = MusicUtils.format_track_info(wrapper.item)  # {"artist","title","url"}
+                info = MusicUtils.format_track_info(wrapper.item)
                 results.append(info)
             except Exception as e:
                 logger.error(f"Error processing track for artist '{artist}': {e}")
@@ -58,7 +69,9 @@ class ArtistTracks:
         - artist: The name of the artist (e.g., "BTS").
 
         Returns:
-        A list of track information [{"artist": "artist_name", "title": "track_title", "url": "link"}, ...].
+        list of {
+          "videoId","title","channelName","thumbnailUrl","youtubeUrl"
+        }
         """
         # 툴 래퍼는 내부의 순수 함수만 호출
         return ArtistTracks.fetch_top_tracks_by_artist(artist, limit=ArtistTracks._default_limit)

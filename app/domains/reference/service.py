@@ -45,18 +45,25 @@ def process_discovery(db: Session, user_id: int, query: str) -> tuple[str, bool]
         # 2) Agent 실행
         logger.info("AgentExecutor 실행 시작 - user_id=%s", user_id)
         result = agent_executor.invoke({"input": decoded_q})
-        logger.debug("AgentExecutor 실행 결과 - user_id=%s, result=%s", user_id, result)
+        logger.debug("AgentExecutor 실행 결과 keys - %s", list(result.keys()))
 
-        output = result.get("output")
-        if isinstance(output, dict):
-            safe_answer = output.get("message", "")
-            # ✅ 키 이름 정확히 사용
-            is_guardrailed = bool(output.get("is_guardrailed"))
-            logger.info("가드레일 dict 응답 처리 - user_id=%s, is_guardrailed=%s", user_id, is_guardrailed)
+        # LLM 최종 답(output) 버리고, 툴 출력만 사용
+        steps = result.get("intermediate_steps", [])
+        if not steps:
+            logger.error("툴 호출 없음 - user_id=%s", user_id)
+            raise AgentExecutionError("도구 호출이 감지되지 않았습니다.")
+
+        tool_output = steps[-1][1]  # 마지막 툴의 '그대로' 출력 (list/dict/str 등)
+        logger.debug("마지막 툴 출력 타입=%s", type(tool_output).__name__)
+
+        # 가드레일 판정: moderation_tool이 dict로 {"message":..., "is_guardrailed": True} 형태를 준다고 가정
+        if isinstance(tool_output, dict):
+            safe_answer = tool_output.get("message") or tool_output.get("answer") or tool_output
+            is_guardrailed = bool(tool_output.get("is_guardrailed", False))
         else:
-            safe_answer = str(output) if output else ""
+            # 리스트(추천 결과)나 문자열 등은 그대로 반환
+            safe_answer = tool_output
             is_guardrailed = False
-            logger.info("일반 응답 처리 - user_id=%s, is_guardrailed=False", user_id)
 
         # 3) 채팅 기록 저장
         try:

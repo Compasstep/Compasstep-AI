@@ -6,7 +6,7 @@ from app.agent.utils import MusicUtils
 logger = get_logger("app.agent.tools.global_tracks")
 
 class GlobalTracks:
-    _default_limit = 3
+    _default_limit = 4
 
     @staticmethod
     @tool
@@ -19,7 +19,10 @@ class GlobalTracks:
         - "Recommend popular songs" -> get_global_top_tracks()
 
         Returns:
-        A list of track information [{"artist": "artist_name", "title": "track_title", "url": "link"}, ...].
+        [
+          {"videoId","title","channelName","thumbnailUrl","youtubeUrl"},
+          ...
+        ]
         """
         MusicUtils.initialize_lastfm()
         MusicUtils.rate_limit()
@@ -31,13 +34,10 @@ class GlobalTracks:
             logger.error(f"Failed to fetch global top tracks: {e}")
             return []
 
-        results = []
+        results: List[Dict[str, str]] = []
         for wrapper in top_tracks:
             try:
-                track_info = MusicUtils.format_track_info(wrapper.item)
-                results.append(track_info)
+                results.append(MusicUtils.format_track_info(wrapper.item))
             except Exception as e:
                 logger.error(f"Error processing global track: {e}")
-                continue
-
         return results

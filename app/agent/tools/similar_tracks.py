@@ -6,7 +6,7 @@ from app.agent.utils import MusicUtils
 logger = get_logger("app.agent.tools.similar_tracks")
 
 class SimilarTracks:
-    _default_limit = 3
+    _default_limit = 4
 
     @staticmethod
     @tool
@@ -19,12 +19,15 @@ class SimilarTracks:
         - artist_name: The name of the artist (use the English name if possible, e.g., "아이유" -> "IU", "싸이" -> "Psy").
 
         Returns:
-        A list of track information [{"artist": "artist_name", "title": "track_title", "url": "link"}, ...].
+        [
+          {"videoId","title","channelName","thumbnailUrl","youtubeUrl"},
+          ...
+        ]
         """
         MusicUtils.initialize_lastfm()
         MusicUtils.rate_limit()
 
-        if not artist.strip() or not track.strip():
+        if not artist or not artist.strip() or not track or not track.strip():
             logger.warning("Empty artist or track provided to get_similar_tracks")
             return []
 
@@ -36,13 +39,10 @@ class SimilarTracks:
             logger.error(f"Failed to fetch similar tracks for '{artist} - {track}': {e}")
             return []
 
-        results = []
+        results: List[Dict[str, str]] = []
         for wrapper in similar_tracks:
             try:
-                track_info = MusicUtils.format_track_info(wrapper.item)
-                results.append(track_info)
+                results.append(MusicUtils.format_track_info(wrapper.item))
             except Exception as e:
                 logger.error(f"Error processing similar track for '{artist} - {track}': {e}")
-                continue
-
         return results
