@@ -9,8 +9,8 @@ uvicorn # 김현준 / 25.09.17
 
 # Langchain 관련 패키지
 langchain # Core 기능 / 김현준 / 25.10.01
-langchain-core # 프롬프트, 파서 / 김현준 / 25.10.01
 langchain-openai # openai 모델을 사용하기 위한 패키지 / 김현준 / 25.09.21
+langchain-community  # 커뮤니티 통합(툴/벡터스토어 등) / 김현준 / 25.10.20
 
 # 레퍼런스 탐색 관련 패키지
 pylast # last.fm API를 호출하기 위해 필요 / 김현준 / 25.09.17
@@ -22,3 +22,4 @@ openai # gpt 모델을 사용하기 위한 패키지 / 김현준 / 25.10.01
 
 # DB 관련 패키지
 psycopg # PostgreSQL DB에 접속하고 SQL 쿼리를 실행할 수 있도록 해주는 패키지 / 김현준 / 25.10.01
+sqlalchemy # ORM / 김현준 / 25.10.01
