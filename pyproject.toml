@@ -1,16 +1,18 @@
-
 [project]
 name = "compassstep-ai"
 version = "0.1.0"
-description = "HiO"
+description = "Compasstep"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "fastapi>=0.116.2",
     "google-api-python-client>=2.182.0",
-    "langchain>=0.3.27",
-    "langchain-core>=0.3.76",
-    "langchain-openai>=0.3.33",
+
+    # LangChain 패밀리
+    "langchain==0.3.27",
+    "langchain-openai==0.3.33",
+    "langchain-community==0.3.27",
+
     "openai>=1.108.1",
     "psycopg[binary]>=3.2.10",
     "pycountry>=24.6.1",
@@ -18,9 +20,9 @@ dependencies = [
     "pylast>=5.5.0",
     "python-dotenv>=1.1.1",
     "requests>=2.32.5",
+    "sqlalchemy>=2.0.44",
     "uvicorn>=0.35.0",
 ]
 
 [dependency-groups]
-dev = [
-]
+dev = []
