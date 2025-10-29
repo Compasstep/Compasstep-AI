@@ -11,11 +11,11 @@ class Post(Base, TimestampMixin):
     keywords = Column(JSONB, nullable=True)
     post_name = Column(String(255), nullable=True)
 
-    share_details = Column(JSONB, nullable=False)
-    share_link = Column(String(255), nullable=False, unique=True)
-    share_summary = Column(JSONB, nullable=False)
+    share_details = Column(JSONB, nullable=True)
+    share_summary = Column(JSONB, nullable=True)
+
+    analyzed = Column(Boolean, nullable=False, server_default=expression.false())
 
     __table_args__ = (
         UniqueConstraint("song_id", name="uq_posts_song_id"),
-        UniqueConstraint("share_link", name="uq_posts_share_link"),
     )
