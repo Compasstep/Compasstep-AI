@@ -1,5 +1,6 @@
-from sqlalchemy import Column, String, BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, String, BigInteger, ForeignKey, UniqueConstraint, Boolean
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.sql import expression
 from app.db.models.base import Base, TimestampMixin
 
 class Post(Base, TimestampMixin):
