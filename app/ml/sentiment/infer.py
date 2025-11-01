@@ -1,26 +1,33 @@
-# app/ml/sentiment/infer.py
 from __future__ import annotations
 from typing import List, Dict, Tuple
-import json, os
+import json, os, random
 from pathlib import Path
-import torch
 
-# ---- [선택] 실제 모델 사용: transformers/torch가 없으면 친절히 안내 ----
+
+# =====================================================
+# ① Torch/Transformers Import & Dummy Safe Mode
+# =====================================================
 _USE_DUMMY = False
 try:
     import torch  # type: ignore
     from transformers import AutoTokenizer, AutoModelForSequenceClassification  # type: ignore
 except Exception:
     _USE_DUMMY = True
+    torch = None
+    print("[SentimentModel] ⚠️ transformers/torch not available. Running in DUMMY mode.")
 
-# ====== L1 라벨 20개 로드 ======
+# =====================================================
+# ② L1 라벨 로드
+# =====================================================
 _THIS_DIR = Path(__file__).resolve().parent
-_L1_PATH = _THIS_DIR.parent.parent.parent / "L1_id_map.json"  # repo 루트에 있는 파일 기준
+_L1_PATH = _THIS_DIR.parent.parent.parent / "L1_id_map.json"
 with open(_L1_PATH, "r", encoding="utf-8") as f:
     L1_ID_MAP: Dict[str, int] = json.load(f)
 ID2LABEL = {v: k for k, v in L1_ID_MAP.items()}
 
-# ====== 감정→극성 매핑 (사용자 제공 스펙을 코드화) ======
+# =====================================================
+# ③ 감정 → 극성 매핑
+# =====================================================
 MAPPING_SPEC = {
     "joy_happiness": {"polarity": "positive", "members": ["뿌듯함","즐거움/신남","흐뭇함(귀여움/예쁨)","행복","기쁨","amusement","excitement","joy","optimism","pride"]},
     "gratitude": {"polarity": "positive", "members": ["고마움","gratitude"]},
@@ -43,47 +50,84 @@ MAPPING_SPEC = {
     "arrogance": {"polarity": "neutral", "members": ["우쭐댐/무시함"]},
     "neutral_misc": {"polarity": "neutral", "members": ["없음","neutral"]},
 }
-
 POLARITY_OF = {k: v["polarity"] for k, v in MAPPING_SPEC.items()}
 
+
+# =====================================================
+# ④ 감정 확률 → 극성 결정
+# =====================================================
 def _majority_polarity_from_emotions(prob: Dict[str, float], top_k: int = 6) -> str:
-    """댓글 하나에 대해 ‘상위 k 감정’의 개수 다수결로 polarity 결정."""
+    """댓글 하나에 대해 상위 k 감정의 다수결로 polarity 결정"""
     tops = sorted(prob.items(), key=lambda x: x[1], reverse=True)[:top_k]
     bucket = {"positive": 0, "negative": 0, "neutral": 0}
     for lbl, _p in tops:
         pol = POLARITY_OF.get(lbl, "neutral")
         bucket[pol] += 1
-    # 다수결, 동률이면 확률 합이 큰 쪽
+
     max_cnt = max(bucket.values())
     cands = [k for k, v in bucket.items() if v == max_cnt]
     if len(cands) == 1:
         return cands[0]
-    # 동률 깨기: 해당 polarity에 속하는 확률 합
+
     sums = {pol: sum(prob[l] for l in prob if POLARITY_OF.get(l, "neutral") == pol) for pol in cands}
     return max(sums.items(), key=lambda x: x[1])[0]
 
+
+# =====================================================
+# ⑤ SentimentModel 클래스 (GPU 자동 감지 + .env 지원)
+# =====================================================
 class SentimentModel:
-    """더미↔실모델 호환 인터페이스 (predict_batch 반환 구조 동일)."""
+    """실제 모델 or 더미모델. GPU 자동 감지 + .env 모델 경로 지원."""
 
     def __init__(self, model_name_or_path: str | None = None, device: str | None = None):
-        self.use_dummy = _USE_DUMMY or (model_name_or_path is None)
+        self.use_dummy = _USE_DUMMY
+
+        # --------------------------
+        # 1) 모델 경로 설정 (.env 인식)
+        # --------------------------
+        if model_name_or_path is None:
+            model_name_or_path = os.getenv(
+                "SENTIMENT_MODEL_PATH",
+                "C:/Users/james/Desktop/model/local_train/results/run_9/checkpoint-13035",
+            )
+
+        # --------------------------
+        # 2) 디바이스 자동 감지
+        # --------------------------
+        if device is None:
+            if not _USE_DUMMY and torch is not None:
+                if torch.cuda.is_available():
+                    device = "cuda"
+                elif getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
+                    device = "mps"
+                else:
+                    device = "cpu"
+            else:
+                device = "cpu"
+        self.device = device
+
         if self.use_dummy:
-            print("[SentimentModel] Using DUMMY predictions.")
+            print("[SentimentModel] 🚧 Using DUMMY predictions (no torch).")
             self.model = None
             self.tokenizer = None
             return
 
+        print(f"[SentimentModel] 🚀 Loading model from {model_name_or_path}")
+        print(f"[SentimentModel] 🧠 Using device: {self.device}")
+
+        # --------------------------
+        # 3) 모델 로드
+        # --------------------------
         self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
         self.model = AutoModelForSequenceClassification.from_pretrained(
             model_name_or_path, num_labels=len(L1_ID_MAP)
         )
-        self.model.eval()
-        if device is None:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.device = device
         self.model.to(self.device)
-        print(f"[SentimentModel] Loaded {model_name_or_path} on {self.device}")
+        self.model.eval()
 
+    # =====================================================
+    # 🔹 내부 배치 예측 함수
+    # =====================================================
     @torch.inference_mode()
     def _predict_one_batch(self, batch_texts: List[str]) -> List[Dict[str, float]]:
         toks = self.tokenizer(
@@ -93,18 +137,20 @@ class SentimentModel:
             max_length=256,
             return_tensors="pt",
         ).to(self.device)
-        logits = self.model(**toks).logits  # (B, 20)
+        logits = self.model(**toks).logits
         probs = torch.softmax(logits, dim=-1).cpu().tolist()
+
         outs: List[Dict[str, float]] = []
         for row in probs:
-            d = {ID2LABEL[i]: float(row[i]) for i in range(len(row))}
-            outs.append(d)
+            outs.append({ID2LABEL[i]: float(row[i]) for i in range(len(row))})
         return outs
 
+    # =====================================================
+    # 🔹 외부 호출용 predict_batch
+    # =====================================================
     def predict_batch(self, comments: List[str]) -> List[Dict]:
-        """반환: [{'emotions': {label:prob...}, 'polarity': {pos/neg/neu}} ...]"""
+        """반환: [{'emotions': {...}, 'polarity': {...}} ...]"""
         if self.use_dummy:
-            import random
             emotions = list(L1_ID_MAP.keys())
             outs = []
             for _t in comments:

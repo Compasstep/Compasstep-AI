@@ -11,37 +11,11 @@ from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 
 from app.core.logger import get_logger
+from app.ml.sentiment.keywords import extract_keywords_mixed
 from app.ml.sentiment.infer import SentimentModel
 
 load_dotenv()
 logger = get_logger("reputation_service")
-
-STOPWORDS = set("""
-의 가 이 은 는 을 를 과 와 도 으로 로 에 에서 으로서 그리고 그러나 하지만 그래서 또는 혹은
-the a an of to for and or in on at from with by about into over after before under
-""".split())
-
-
-# ---------------------------------------------------------------------------
-# 🧩 간단한 키워드 추출기
-# ---------------------------------------------------------------------------
-def normalize_text(text: str) -> str:
-    text = re.sub(r"https?://\S+", " ", text)
-    text = re.sub(r"[^\w\s가-힣]", " ", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
-
-
-def extract_keywords_simple(texts: List[str], top_k: int = 20) -> List[str]:
-    tokens = []
-    for t in texts:
-        t = normalize_text(t)
-        toks = [w.lower() for w in t.split()
-                if 2 <= len(w) <= 20 and not w.isdigit() and w not in STOPWORDS]
-        tokens.extend(toks)
-    freq = Counter(tokens)
-    return [k for k, _ in freq.most_common(top_k)]
-
 
 # ---------------------------------------------------------------------------
 # 🧠 메인 서비스 클래스
@@ -146,6 +120,17 @@ class YoutubeReputationServiceAsync:
         return sentiment_summary, emotion_details
 
     # ----------------------------------------------------------------------
+    async def extract_keywords_async(self, texts: List[str]) -> List[str]:
+        """한국어 + 영어 혼합 키워드 추출 (비동기 안전)"""
+        loop = asyncio.get_event_loop()
+
+        def _extract():
+            return extract_keywords_mixed(texts)
+
+        keywords = await loop.run_in_executor(self.executor, _extract)
+        return keywords
+
+    # ----------------------------------------------------------------------
     async def build_review_items(self, comments: List[Dict], inference_results: List[Dict]) -> List[Dict]:
         items = []
         for c, pred in zip(comments, inference_results):
@@ -179,7 +164,7 @@ class YoutubeReputationServiceAsync:
 
         # 3️⃣ 집계 및 키워드
         sentiment_summary, emotion_details = await self.aggregate_summary(preds)
-        keywords = extract_keywords_simple(texts)
+        keywords = await self.extract_keywords_async(texts)
         reviews = await self.build_review_items(raw_comments, preds)
         top_emotions = sorted(emotion_details.items(), key=lambda x: x[1], reverse=True)[:10]
 
