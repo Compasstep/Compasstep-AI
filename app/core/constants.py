@@ -20,3 +20,9 @@ psycopg_connection_string = (
     "connect_timeout=5 keepalives=1 keepalives_idle=30 keepalives_interval=10 keepalives_count=3 "
     "options='-c statement_timeout=60000'"
 )
+
+# 비동기 전용 URI (명시적으로): asyncpg 드라이버 사용
+# -> Windows Proactor 루프 문제를 피하려면 asyncpg 사용 권장
+ASYNC_DB_URI = (
+    f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
