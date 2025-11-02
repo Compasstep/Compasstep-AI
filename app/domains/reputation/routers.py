@@ -1,4 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.session import get_async_db
 from app.domains.reputation.schemas import YoutubeReputationRequest, ErrorResponse
 from app.domains.reputation.service import YoutubeReputationServiceAsync
 
@@ -11,11 +13,12 @@ def get_service():
 async def analyze_youtube_reputation(
     body: YoutubeReputationRequest,
     svc: YoutubeReputationServiceAsync = Depends(get_service),
+    db: AsyncSession = Depends(get_async_db),
 ):
     if not body.songTitle or not body.artist:
         raise HTTPException(status_code=400, detail={"code": "400", "message": "필수 입력 항목이 누락되었습니다.", "result": None})
 
-    result = await svc.analyze_youtube_reputation(body.songTitle, body.artist)
+    result = await svc.analyze_youtube_reputation(body.songTitle, body.artist, db)
     if result is None:
         raise HTTPException(status_code=404, detail={"code": "404", "message": "해당 곡의 유튜브 영상을 찾을 수 없습니다.", "result": None})
 
