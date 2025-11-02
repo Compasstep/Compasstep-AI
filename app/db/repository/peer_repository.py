@@ -50,7 +50,7 @@ class PeerReputationRepository:
             SET share_summary = :summary,
                 share_details = :details,
                 keywords = :keywords,
-                updated_at = :updated_at
+                updated_at = :updated_at,
                 analyzed = true
             WHERE id = :post_id
         """)
