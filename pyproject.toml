@@ -38,26 +38,3 @@ dependencies = [
 
 [dependency-groups]
 dev = []
-
-# --------------------------------------------------------
-# ⚙️ OS별 Torch 의존성 분기
-# --------------------------------------------------------
-[project.optional-dependencies]
-torch-cuda = [
-    "torch==2.5.1+cu128; sys_platform == 'win32'",
-    "torchvision==0.20.1+cu128; sys_platform == 'win32'",
-    "torchaudio==2.5.1+cu128; sys_platform == 'win32'"
-]
-torch = [
-    "torch==2.5.1; sys_platform == 'darwin'",
-    "torchvision==0.20.1; sys_platform == 'darwin'",
-    "torchaudio==2.5.1; sys_platform == 'darwin'"
-]
-
-# --------------------------------------------------------
-# ⚙️ CUDA wheel repo 지정 (Windows용)
-# --------------------------------------------------------
-[tool.uv.sources]
-torch = { index = "https://download.pytorch.org/whl/cu128", markers = "sys_platform == 'win32'" }
-torchvision = { index = "https://download.pytorch.org/whl/cu128", markers = "sys_platform == 'win32'" }
-torchaudio = { index = "https://download.pytorch.org/whl/cu128", markers = "sys_platform == 'win32'" }
