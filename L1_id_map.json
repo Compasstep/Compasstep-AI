@@ -1,0 +1,22 @@
+{
+  "joy_happiness": 0,
+  "gratitude": 1,
+  "admiration": 2,
+  "interest_curiosity": 3,
+  "approval": 4,
+  "anger_annoyance": 5,
+  "disgust": 6,
+  "sadness_grief": 7,
+  "fear_nervousness": 8,
+  "surprise": 9,
+  "realization": 10,
+  "relief": 11,
+  "caring_love": 12,
+  "embarrassment": 13,
+  "confusion": 14,
+  "curiosity": 15,
+  "disapproval": 16,
+  "resolute": 17,
+  "arrogance": 18,
+  "neutral_misc": 19
+}

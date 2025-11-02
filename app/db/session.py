@@ -1,8 +1,12 @@
 # app/db/session.py
 from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import sessionmaker
-from app.core.constants import psycopg_connection_uri  # DB 연결 URI (env에서 불러온 값)
+from app.core.constants import psycopg_connection_uri, ASYNC_DB_URI  # DB 연결 URI (env에서 불러온 값)
 
+# =====================================================
+# 동기 엔진
+# =====================================================
 # SQLAlchemy 엔진 생성 (PostgreSQL 최적화 옵션 포함)
 engine = create_engine(
     psycopg_connection_uri,
@@ -39,3 +43,38 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# =====================================================
+# 비동기 엔진 (FastAPI async 전용)
+# =====================================================
+async_uri = ASYNC_DB_URI  # <- 직관적이고 안전
+
+# 디버그: 실제 사용되는 URI 출력 (테스트 시 확인)
+print(f"🔍 [DEBUG] sync URI (psycopg_connection_uri) = {psycopg_connection_uri}")
+print(f"🔍 [DEBUG] async_engine URI (async_uri) = {async_uri}")
+
+async_engine = create_async_engine(
+    async_uri,
+    pool_size=10,
+    max_overflow=10,
+    pool_timeout=15,
+    pool_recycle=900,
+    pool_pre_ping=True,
+    connect_args={
+        "server_settings": {
+            "application_name": "compasstep-ai",
+        }
+    },
+)
+
+async_session = async_sessionmaker(
+    bind=async_engine,
+    class_=AsyncSession,
+    autocommit=False,
+    autoflush=False,
+    expire_on_commit=False,
+)
+
+async def get_async_db():
+    async with async_session() as session:
+        yield session
