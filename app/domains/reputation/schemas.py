@@ -7,6 +7,7 @@ from datetime import datetime
 class YoutubeReputationRequest(BaseModel):
     songTitle: str = Field(..., description="곡 제목")
     artist: str = Field(..., description="가수 이름")
+    userId: int | None = None  # 🔹 자바에서 넘기거나 없을 수도 있음
 
 
 # === Response: Summary ===

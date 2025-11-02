@@ -156,7 +156,7 @@ class YoutubeReputationServiceAsync:
         return items
 
     # ----------------------------------------------------------------------
-    async def analyze_youtube_reputation(self, song_title: str, artist: str, db: AsyncSession):
+    async def analyze_youtube_reputation(self, song_title: str, artist: str, db: AsyncSession, user_id: int):
         # 1️⃣ 댓글 수집
         raw_comments = await self.fetch_youtube_comments(artist, song_title)
         if not raw_comments:
@@ -178,7 +178,7 @@ class YoutubeReputationServiceAsync:
 
         # ✅ reputation_analysis 저장
         new_record = ReputationAnalysis(
-            user_id=1,
+            user_id=user_id,
             song_title=song_title,
             artist_name=artist,
             sentiment_summary=sentiment_summary,

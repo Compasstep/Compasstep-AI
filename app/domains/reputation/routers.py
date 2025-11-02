@@ -18,7 +18,10 @@ async def analyze_youtube_reputation(
     if not body.songTitle or not body.artist:
         raise HTTPException(status_code=400, detail={"code": "400", "message": "필수 입력 항목이 누락되었습니다.", "result": None})
 
-    result = await svc.analyze_youtube_reputation(body.songTitle, body.artist, db)
+    # ✅ user_id 처리 추가
+    user_id = body.userId or 1
+
+    result = await svc.analyze_youtube_reputation(body.songTitle, body.artist, db, user_id)
     if result is None:
         raise HTTPException(status_code=404, detail={"code": "404", "message": "해당 곡의 유튜브 영상을 찾을 수 없습니다.", "result": None})
 
