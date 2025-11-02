@@ -22,7 +22,7 @@ _USE_DUMMY = False
 try:
     import torch  # type: ignore
     from transformers import AutoTokenizer, AutoModelForSequenceClassification  # type: ignore
-    raise ImportError("🔥 Forced import failure for testing Dummy mode") #더미 실행원하면 활성화
+    #raise ImportError("🔥 Forced import failure for testing Dummy mode") #더미 실행원하면 활성화
 
 except Exception:
     _USE_DUMMY = True

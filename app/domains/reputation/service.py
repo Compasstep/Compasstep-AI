@@ -8,15 +8,13 @@ from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.exc import SQLAlchemyError
-from app.db.models.reputation_analysis import ReputationAnalysis
-from app.db.models.retraining_data import RetrainingData
 
 from app.core.logger import get_logger
 from app.ml.sentiment.keywords import extract_keywords_mixed
 from app.ml.sentiment.infer import SentimentModel
+
+from app.db.repository.youtube_reputation_repo import YoutubeReputationRepository
+from app.db.repository.retraining_repo import RetrainingRepository
 
 #from app.core.cache import RedisCache
 
@@ -179,57 +177,13 @@ class YoutubeReputationServiceAsync:
         now = datetime.now(timezone.utc)
         video_id = raw_comments[0].get("video_id", "unknown")
 
-        # ✅ reputation_analysis 저장
-        new_record = ReputationAnalysis(
-            user_id=user_id,
-            song_title=song_title,
-            artist_name=artist,
-            sentiment_summary=sentiment_summary,
-            emotion_details=emotion_details,
-            keywords=keywords,
-            created_at=now,
-            updated_at=now
+        await YoutubeReputationRepository.save_analysis(
+            db, user_id, song_title, artist, sentiment_summary, emotion_details, keywords, now
         )
 
-        db.add(new_record)
-        await db.commit()
-        await db.refresh(new_record)
-        logger.info(f"✅ 평판 분석 결과 저장 완료: reputation_analysis id={new_record.id}")
-
-        # ✅ retraining_data 저장
-        retrain_rows = []
-        for review in reviews:
-            emotions = review["prediction"]["emotions"]  # 상위 2개 감정 레이블
-            confidence = float(review["prediction"]["confidence"])
-            comment_text = review["commentText"]
-
-            if confidence < CONF_THRESHOLD:
-                # 🔁 ORM 인스턴스 말고 "딕셔너리"로 바로 적재
-                retrain_rows.append({
-                    "comment_text": comment_text,
-                    "prediction": emotions,  # ["admiration","confusion"]
-                    "confidence": confidence,
-                    "is_learned": False,
-                    "is_reviewed": False,
-                    "created_at": now,
-                    "updated_at": now,
-                    # ⚠️ comment_hash 는 DB가 자동 생성한다. 여기서 넣지 말 것!
-                })
-
-        if retrain_rows:
-            try:
-                stmt = insert(RetrainingData.__table__).values(retrain_rows) \
-                    .on_conflict_do_nothing(index_elements=["comment_hash"])  # ✅ 해시 기준 중복 무시
-
-                await db.execute(stmt)
-                await db.commit()
-                logger.info(f"✅ 재학습용 데이터 {len(retrain_rows)}건 저장 시도 완료 (중복은 자동 무시, threshold={CONF_THRESHOLD})")
-
-            except SQLAlchemyError as e:
-                await db.rollback()
-                logger.error(f"❌ 재학습 데이터 저장 중 오류 발생: {e}")
-        else:
-            logger.info(f"✅ 재학습 데이터 없음 (모든 confidence ≥ {CONF_THRESHOLD})")
+        await RetrainingRepository.save_retraining_data(
+            db, reviews, now, conf_threshold=CONF_THRESHOLD
+        )
 
         # 4️⃣ Redis 저장용 payload
         payload = {
