@@ -3,6 +3,16 @@ from typing import List, Dict, Tuple
 import json, os, random
 from pathlib import Path
 
+# =====================================================
+# Dummy-safe decorator (핵심)
+# =====================================================
+def safe_inference_mode():
+    """torch가 없으면 그냥 원본 함수를 그대로 반환"""
+    if torch is None:
+        def decorator(func):
+            return func
+        return decorator
+    return torch.inference_mode()
 
 # =====================================================
 # ① Torch/Transformers Import & Dummy Safe Mode
@@ -11,6 +21,8 @@ _USE_DUMMY = False
 try:
     import torch  # type: ignore
     from transformers import AutoTokenizer, AutoModelForSequenceClassification  # type: ignore
+    raise ImportError("🔥 Forced import failure for testing Dummy mode") #더미 실행원하면 활성화
+
 except Exception:
     _USE_DUMMY = True
     torch = None
@@ -128,7 +140,7 @@ class SentimentModel:
     # =====================================================
     # 🔹 내부 배치 예측 함수
     # =====================================================
-    @torch.inference_mode()
+    @safe_inference_mode()
     def _predict_one_batch(self, batch_texts: List[str]) -> List[Dict[str, float]]:
         toks = self.tokenizer(
             batch_texts,
