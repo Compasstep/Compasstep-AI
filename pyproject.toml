@@ -31,6 +31,9 @@ dependencies = [
     "numpy>=2.3.4",
     "tqdm>=4.67.1",
     "asyncpg>=0.30.0",
+    "redis>=7.0.1",
+    "aioredis>=2.0.1",
+    "aio-pika>=9.5.7",
 ]
 
 [dependency-groups]

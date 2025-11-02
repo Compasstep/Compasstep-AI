@@ -18,6 +18,9 @@ from app.core.logger import get_logger
 from app.ml.sentiment.keywords import extract_keywords_mixed
 from app.ml.sentiment.infer import SentimentModel
 
+#from app.core.cache import RedisCache
+
+
 load_dotenv()
 logger = get_logger("reputation_service")
 
@@ -245,21 +248,10 @@ class YoutubeReputationServiceAsync:
             },
         }
 
-        # ------------------------------------------------------------------
-        # 🧩 비동기 메시징/RabbitMQ 자리 (나중에 활성화)
-        # publish_to_rabbitmq(queue="reputation.result", body=json.dumps(payload))
-        #
-        # 🧩 Redis 캐싱 자리
-        # import redis
-        # r = redis.Redis(
-        #     host=os.getenv("REDIS_HOST", "localhost"),
-        #     port=int(os.getenv("REDIS_PORT", "6379")),
-        #     decode_responses=True
-        # )
-        # r.set(f"rep:{video_id}", json.dumps(payload))
-        # r.expire(f"rep:{video_id}", 7 * 24 * 3600)
+        # ✅ Redis 캐싱
+        #cache = RedisCache()
+        #cache.set_json(f"rep:{video_id}", payload)
 
-        # ------------------------------------------------------------------
         summary_block = {
             "songTitle": song_title,
             "sentimentSummary": sentiment_summary,

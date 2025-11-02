@@ -26,3 +26,9 @@ def logger_test():
     logger.error("Logger Test")
     logger.critical("Logger Test")
     return {"status": "active"}
+
+# ✅ RabbitMQ consumer 실행
+#@app.on_event("startup")
+#async def startup_event():
+#    loop = asyncio.get_event_loop()
+#    loop.create_task(start_consumer())
