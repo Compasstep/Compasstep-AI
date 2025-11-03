@@ -4,6 +4,7 @@ from typing import List, Dict, Tuple
 import json, os, random
 from pathlib import Path
 from peft import PeftModel
+from app.ml.retrain.manager import AdapterManager
 
 # =====================================================
 # Dummy-safe decorator (핵심)
@@ -153,6 +154,23 @@ class SentimentModel:
 
         self.model = base_model.to(self.device)
         self.model.eval()
+
+    # =====================================================
+    # 🔹 활성화된 어댑터 경로 조회 함수
+    # =====================================================
+    def _get_active_adapter_path(self) -> str | None:
+        """현재 registry.json에서 is_active=True인 어댑터 경로 반환"""
+        try:
+            manager = AdapterManager()
+            active = manager.get_active_adapter()
+            if active:
+                print(f"[SentimentModel] 🔗 Active adapter found: {active}")
+            else:
+                print("[SentimentModel] ⚠️ No active adapter registered — using base model only.")
+            return active
+        except Exception as e:
+            print(f"[SentimentModel] ⚠️ Adapter lookup failed: {e}")
+            return None
 
     # =====================================================
     # 🔹 내부 배치 예측 함수

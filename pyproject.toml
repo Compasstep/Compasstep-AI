@@ -35,6 +35,8 @@ dependencies = [
     "aioredis>=2.0.1",
     "aio-pika>=9.5.7",
     "peft>=0.17.1",
+    "psycopg2-binary>=2.9.11",
+    "apscheduler>=3.11.1",
 ]
 
 [dependency-groups]

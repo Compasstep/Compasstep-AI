@@ -4,6 +4,7 @@ from app.core.logger import setup_logging, get_logger
 from app.domains.reference.routers import chat_router
 from app.domains.reputation.routers import router as reputation_router
 from app.domains.peer_reputation.routers import router as peer_router
+from app.core.scheduler import start_scheduler
 
 
 setup_logging()
@@ -29,6 +30,10 @@ def logger_test():
     logger.error("Logger Test")
     logger.critical("Logger Test")
     return {"status": "active"}
+
+@app.on_event("startup")
+def on_startup():
+    start_scheduler()
 
 # ✅ RabbitMQ consumer 실행
 #@app.on_event("startup")
