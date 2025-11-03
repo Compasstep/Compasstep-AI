@@ -34,6 +34,7 @@ dependencies = [
     "redis>=7.0.1",
     "aioredis>=2.0.1",
     "aio-pika>=9.5.7",
+    "peft>=0.17.1",
 ]
 
 [dependency-groups]

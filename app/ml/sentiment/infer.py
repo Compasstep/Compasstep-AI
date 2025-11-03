@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import List, Dict, Tuple
 import json, os, random
 from pathlib import Path
+from peft import PeftModel
 
 # =====================================================
 # Dummy-safe decorator (핵심)
@@ -132,10 +133,25 @@ class SentimentModel:
         # 3) 모델 로드
         # --------------------------
         self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
-        self.model = AutoModelForSequenceClassification.from_pretrained(
+        base_model = AutoModelForSequenceClassification.from_pretrained(
             model_name_or_path, num_labels=len(L1_ID_MAP)
         )
-        self.model.to(self.device)
+
+        # --------------------------
+        # 4) LoRA 어댑터 병합 시도
+        # --------------------------
+        active_adapter = self._get_active_adapter_path()  # ✅ 새로 추가된 함수
+        if active_adapter:
+            print(f"[SentimentModel] 🔗 Merging active LoRA adapter: {active_adapter}")
+            try:
+                base_model = PeftModel.from_pretrained(base_model, active_adapter)
+                print("[SentimentModel] ✅ LoRA adapter loaded successfully.")
+            except Exception as e:
+                print(f"[SentimentModel] ⚠️ Failed to load adapter ({e}). Using base model only.")
+        else:
+            print("[SentimentModel] ℹ️ No active adapter found, using base model only.")
+
+        self.model = base_model.to(self.device)
         self.model.eval()
 
     # =====================================================
