@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import List, Dict, Tuple
 import json, os, random
 from pathlib import Path
+from peft import PeftModel
+from app.ml.retrain.manager import AdapterManager
 
 # =====================================================
 # Dummy-safe decorator (핵심)
@@ -132,11 +134,43 @@ class SentimentModel:
         # 3) 모델 로드
         # --------------------------
         self.tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
-        self.model = AutoModelForSequenceClassification.from_pretrained(
+        base_model = AutoModelForSequenceClassification.from_pretrained(
             model_name_or_path, num_labels=len(L1_ID_MAP)
         )
-        self.model.to(self.device)
+
+        # --------------------------
+        # 4) LoRA 어댑터 병합 시도
+        # --------------------------
+        active_adapter = self._get_active_adapter_path()  # ✅ 새로 추가된 함수
+        if active_adapter:
+            print(f"[SentimentModel] 🔗 Merging active LoRA adapter: {active_adapter}")
+            try:
+                base_model = PeftModel.from_pretrained(base_model, active_adapter)
+                print("[SentimentModel] ✅ LoRA adapter loaded successfully.")
+            except Exception as e:
+                print(f"[SentimentModel] ⚠️ Failed to load adapter ({e}). Using base model only.")
+        else:
+            print("[SentimentModel] ℹ️ No active adapter found, using base model only.")
+
+        self.model = base_model.to(self.device)
         self.model.eval()
+
+    # =====================================================
+    # 🔹 활성화된 어댑터 경로 조회 함수
+    # =====================================================
+    def _get_active_adapter_path(self) -> str | None:
+        """현재 registry.json에서 is_active=True인 어댑터 경로 반환"""
+        try:
+            manager = AdapterManager()
+            active = manager.get_active_adapter()
+            if active:
+                print(f"[SentimentModel] 🔗 Active adapter found: {active}")
+            else:
+                print("[SentimentModel] ⚠️ No active adapter registered — using base model only.")
+            return active
+        except Exception as e:
+            print(f"[SentimentModel] ⚠️ Adapter lookup failed: {e}")
+            return None
 
     # =====================================================
     # 🔹 내부 배치 예측 함수
