@@ -3,12 +3,15 @@ from app.ml.retrain.dataset import load_retraining_data, load_test_dataset, mark
 from app.ml.retrain.trainer import LoraTrainer
 from app.ml.retrain.evaluator_test_only import TestEvaluator
 from app.ml.retrain.manager import AdapterManager
+from app.core.logger import get_logger
+
+logger = get_logger("retrain.pipeline")
 
 def run_retraining_pipeline(limit: int = 10000):
-    print("🚀 [START] Retraining pipeline 시작")
+    logger.info("🚀 [START] Retraining pipeline 시작 (limit=%d)", limit)
     df_train = load_retraining_data(limit=limit)
     if df_train.empty:
-        print("⚠️ 학습할 데이터가 없습니다.")
+        logger.warning("⚠️ 학습할 데이터가 없습니다. Pipeline 종료")
         return {"status": "skipped", "reason": "no_data"}
 
     trainer = LoraTrainer()
@@ -23,7 +26,7 @@ def run_retraining_pipeline(limit: int = 10000):
 
     mark_retraining_as_learned()
 
-    print("✅ [DONE] Retraining 완료:", result)
+    logger.info("✅ [DONE] Retraining 완료: %s", result)
     return result
 
 # 👇 실행 트리거 추가
