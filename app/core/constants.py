@@ -26,3 +26,10 @@ psycopg_connection_string = (
 ASYNC_DB_URI = (
     f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
+
+# S3 용 상수
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_S3_REGION = os.getenv("AWS_S3_REGION")
+AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
+AWS_S3_ENDPOINT = os.getenv("AWS_S3_ENDPOINT")
