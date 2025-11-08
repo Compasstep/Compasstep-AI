@@ -52,7 +52,7 @@ def get_db():
 # =====================================================
 async_uri = ASYNC_DB_URI
 
-# 디버그: 실제 사용되는 URI 출력 (테스트 시 확인)
+# 디버그: 실제 사용되는 URI 출력 (테스트 시 print문으로 확인함)
 logger.debug("🔍 sync URI (psycopg_connection_uri) = %s", psycopg_connection_uri)
 logger.debug("🔍 async_engine URI (async_uri) = %s", async_uri)
 
