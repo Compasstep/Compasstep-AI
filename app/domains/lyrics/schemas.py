@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import Optional, Any
 
 class LyricsAnalyzeRequest(BaseModel):
-    lyricsId: int
+    lyrics_id: int
 
 
 class ApiResponse(BaseModel):

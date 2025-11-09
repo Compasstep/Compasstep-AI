@@ -38,16 +38,17 @@ async def analyze_lyrics(
         "lyricsId": 123
     }
     """
+    logger.debug(f"lyrics_id={body.lyrics_id}")
 
     try:
-        if not body.lyricsId:
+        if not body.lyrics_id:
             return ApiResponse(
                 code="400",
                 message="lyricsId는 필수 입력 값입니다.",
                 result=None
             )
 
-        result = await svc.analyze_and_save(db, body.lyricsId)
+        result = await svc.analyze_and_save(db, body.lyrics_id)
 
         if result is None:
             return ApiResponse(
