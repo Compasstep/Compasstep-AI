@@ -7,7 +7,7 @@ from app.domains.lyrics.coaching.service import generate_vocal_coaching
 from app.db.repository.lyrics_repository import LyricsRepository
 from app.core.logger import get_logger
 
-logger = get_logger("lyrics_service")
+logger = get_logger("app.domains.lyrics.service")
 """
 class LyricsService:
     def __init__(self):

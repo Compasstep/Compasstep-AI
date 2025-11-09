@@ -7,7 +7,7 @@ from app.domains.lyrics.schemas import LyricsAnalyzeRequest, ErrorResponse, ApiR
 from app.domains.lyrics.service import LyricsService
 from app.core.logger import get_logger
 
-logger = get_logger("lyrics_router")
+logger = get_logger("app.domain.lyrics.routers")
 
 router = APIRouter(prefix="/ai/user/analyze", tags=["Reputation / Lyrics"])
 

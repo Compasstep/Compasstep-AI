@@ -4,7 +4,7 @@ from app.s3.service import S3Service
 from app.ml.sentiment.infer import SentimentModel
 from app.core.logger import get_logger
 
-logger = get_logger("lyrics.reputation")
+logger = get_logger("app.domain.lyrics.reputation.service")
 
 class LyricsReputationService:
     def __init__(self):
