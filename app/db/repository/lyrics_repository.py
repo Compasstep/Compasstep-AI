@@ -1,4 +1,4 @@
-# app/domains/lyrics/repository/lyrics_repository.py
+# app/db/repository/lyrics_repository.py
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import datetime
@@ -6,7 +6,7 @@ from app.db.models.lyrics import Lyrics
 from app.db.models.lyrics_analysis import LyricsAnalysis
 from app.core.logger import get_logger
 
-logger = get_logger("lyrics_repo")
+logger = get_logger("app/db/repository/lyrics_repository")
 
 class LyricsRepository:
 
