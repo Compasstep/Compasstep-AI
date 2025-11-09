@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_async_db
 from app.domains.reputation.schemas import YoutubeReputationRequest, ErrorResponse
 from app.domains.reputation.service import YoutubeReputationServiceAsync
+from app.core.logger import setup_logging, get_logger
 
 router = APIRouter(prefix="/ai/user/analyze", tags=["Reputation / YouTube"])
 
@@ -16,6 +17,10 @@ async def analyze_youtube_reputation(
     svc: YoutubeReputationServiceAsync = Depends(get_service),
     db: AsyncSession = Depends(get_async_db),
 ):
+    setup_logging()
+    logger = get_logger("라우터")
+    logger.debug(f"songTitle={body.songTitle}, artist={body.artist}, userId={body.userId}")
+
     if not body.songTitle or not body.artist:
         raise HTTPException(status_code=400, detail={"code": "400", "message": "필수 입력 항목이 누락되었습니다.", "result": None})
 

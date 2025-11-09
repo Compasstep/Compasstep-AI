@@ -4,6 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_async_db
 from app.domains.peer_reputation.schemas import PeerReputationRequest, ErrorResponse
 from app.domains.peer_reputation.service import PeerReputationServiceAsync
+from app.core.logger import setup_logging, get_logger
+
 
 router = APIRouter(prefix="/ai/user/analyze", tags=["Reputation / Peer"])
 
@@ -37,6 +39,10 @@ async def analyze_peer_reputation(
     guest_comment 테이블에서 댓글 가져와 모델 분석 후
     post 테이블에 share_summary, share_details, keywords 업데이트.
     """
+    setup_logging()
+    logger = get_logger("라우터")
+    logger.debug(f"postId={body.postId}")
+
     if not body.postId:
         raise HTTPException(
             status_code=400,

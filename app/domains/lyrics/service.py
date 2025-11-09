@@ -8,36 +8,7 @@ from app.db.repository.lyrics_repository import LyricsRepository
 from app.core.logger import get_logger
 
 logger = get_logger("app.domains.lyrics.service")
-"""
-class LyricsService:
-    def __init__(self):
-        self.reputation = LyricsReputationService()
 
-    async def analyze_and_save(self, db: AsyncSession, lyrics_id: int):
-        logger.info(f"통합 가사 분석 시작 (lyrics_id={lyrics_id})")
-
-        # 1) DB에서 S3 경로 조회
-        s3_key = await LyricsRepository.get_s3_path_by_id(db, lyrics_id)
-
-        # 2) 감정 분석 실행 (reputation 서비스 그대로 사용)
-        analysis_result = await self.reputation.analyze_lyrics(s3_key)
-
-        # 3) 친구 코칭 서비스 호출 (coaching 서비스 그대로 사용)
-        logger.info("보컬 코칭 생성 시작")
-        coaching_result = generate_vocal_coaching(analysis_result)
-        logger.info("보컬 코칭 생성 완료")
-
-        # 4) 최종 통합 결과 생성
-        final_result = {
-            "analysisResult": coaching_result
-        }
-
-        # 5) DB 저장
-        await LyricsRepository.save_analysis(db, lyrics_id, final_result)
-        logger.info(f"전체 저장 완료 (lyrics_id={lyrics_id})")
-
-        return final_result
-"""
 class LyricsService:
     def __init__(self):
         self.reputation = LyricsReputationService()
