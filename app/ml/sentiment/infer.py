@@ -5,6 +5,9 @@ import json, os, random
 from pathlib import Path
 from peft import PeftModel
 from app.ml.retrain.manager import AdapterManager
+from app.core.logger import get_logger
+
+logger = get_logger("app.ml.sentiment.infer")
 
 # =====================================================
 # Dummy-safe decorator (핵심)
@@ -29,7 +32,7 @@ try:
 except Exception:
     _USE_DUMMY = True
     torch = None
-    print("[SentimentModel] ⚠️ transformers/torch not available. Running in DUMMY mode.")
+    logger.warning("[SentimentModel] ⚠️ transformers/torch not available. Running in DUMMY mode.")
 
 # =====================================================
 # ② L1 라벨 로드
@@ -122,13 +125,13 @@ class SentimentModel:
         self.device = device
 
         if self.use_dummy:
-            print("[SentimentModel] 🚧 Using DUMMY predictions (no torch).")
+            logger.warning("[SentimentModel] ⚠️ Using DUMMY predictions (no torch).")
             self.model = None
             self.tokenizer = None
             return
 
-        print(f"[SentimentModel] 🚀 Loading model from {model_name_or_path}")
-        print(f"[SentimentModel] 🧠 Using device: {self.device}")
+        logger.info("[SentimentModel] 🚀 Loading model from %s", model_name_or_path)
+        logger.info("[SentimentModel] 🧠 Using device: %s", self.device)
 
         # --------------------------
         # 3) 모델 로드
@@ -143,14 +146,14 @@ class SentimentModel:
         # --------------------------
         active_adapter = self._get_active_adapter_path()  # ✅ 새로 추가된 함수
         if active_adapter:
-            print(f"[SentimentModel] 🔗 Merging active LoRA adapter: {active_adapter}")
+            logger.info("[SentimentModel] 🔗 Merging active LoRA adapter: %s", active_adapter)
             try:
                 base_model = PeftModel.from_pretrained(base_model, active_adapter)
-                print("[SentimentModel] ✅ LoRA adapter loaded successfully.")
+                logger.info("[SentimentModel] ✅ LoRA adapter loaded successfully.")
             except Exception as e:
-                print(f"[SentimentModel] ⚠️ Failed to load adapter ({e}). Using base model only.")
+                logger.error("[SentimentModel] ⚠️ Failed to load adapter. Using base model only.", exc_info=True)
         else:
-            print("[SentimentModel] ℹ️ No active adapter found, using base model only.")
+            logger.info("[SentimentModel] ℹ️ No active adapter found, using base model only.")
 
         self.model = base_model.to(self.device)
         self.model.eval()
@@ -164,12 +167,12 @@ class SentimentModel:
             manager = AdapterManager()
             active = manager.get_active_adapter()
             if active:
-                print(f"[SentimentModel] 🔗 Active adapter found: {active}")
+                logger.info("[SentimentModel] 🔗 Active adapter found: %s", active)
             else:
-                print("[SentimentModel] ⚠️ No active adapter registered — using base model only.")
+                logger.warning("[SentimentModel] ⚠️ No active adapter registered — using base model only.")
             return active
         except Exception as e:
-            print(f"[SentimentModel] ⚠️ Adapter lookup failed: {e}")
+            logger.error("[SentimentModel] ⚠️ Adapter lookup failed", exc_info=True)
             return None
 
     # =====================================================

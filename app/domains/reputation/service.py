@@ -20,7 +20,7 @@ from app.db.repository.retraining_repo import RetrainingRepository
 
 
 load_dotenv()
-logger = get_logger("reputation_service")
+logger = get_logger("app.domains.reputation.service")
 
 CONF_THRESHOLD = 0.5
 

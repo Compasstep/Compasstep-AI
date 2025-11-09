@@ -3,6 +3,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import sessionmaker
 from app.core.constants import psycopg_connection_uri, ASYNC_DB_URI  # DB 연결 URI (env에서 불러온 값)
+from app.core.logger import get_logger
+
+logger = get_logger("app.db.session")
 
 # =====================================================
 # 동기 엔진
@@ -47,11 +50,11 @@ def get_db():
 # =====================================================
 # 비동기 엔진 (FastAPI async 전용)
 # =====================================================
-async_uri = ASYNC_DB_URI  # <- 직관적이고 안전
+async_uri = ASYNC_DB_URI
 
-# 디버그: 실제 사용되는 URI 출력 (테스트 시 확인)
-print(f"🔍 [DEBUG] sync URI (psycopg_connection_uri) = {psycopg_connection_uri}")
-print(f"🔍 [DEBUG] async_engine URI (async_uri) = {async_uri}")
+# 디버그: 실제 사용되는 URI 출력 (테스트 시 print문으로 확인함)
+logger.debug("🔍 sync URI (psycopg_connection_uri) = %s", psycopg_connection_uri)
+logger.debug("🔍 async_engine URI (async_uri) = %s", async_uri)
 
 async_engine = create_async_engine(
     async_uri,
