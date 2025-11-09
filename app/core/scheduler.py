@@ -3,7 +3,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 from app.ml.retrain.pipeline import run_retraining_pipeline
 from app.core.logger import get_logger
+import logging
 
+logging.getLogger("apscheduler.scheduler").setLevel(logging.WARNING)
+logging.getLogger("apscheduler.executors").setLevel(logging.WARNING)
 logger = get_logger("app.core.scheduler")
 
 scheduler = BackgroundScheduler(timezone="Asia/Seoul")
