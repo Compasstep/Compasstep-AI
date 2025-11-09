@@ -6,7 +6,7 @@ from app.domains.reputation.service import YoutubeReputationServiceAsync
 from app.db.session import async_session
 from app.core.logger import get_logger
 
-logger = get_logger("reputation_consumer")
+logger = get_logger("app.domains.reputation.consumer")
 
 async def handle_message(msg: IncomingMessage):
     """RabbitMQ에서 들어온 메시지를 처리"""

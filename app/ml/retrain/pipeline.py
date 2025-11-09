@@ -5,7 +5,7 @@ from app.ml.retrain.evaluator_test_only import TestEvaluator
 from app.ml.retrain.manager import AdapterManager
 from app.core.logger import get_logger
 
-logger = get_logger("retrain.pipeline")
+logger = get_logger("app.ml.retrain.pipeline")
 
 def run_retraining_pipeline(limit: int = 10000):
     logger.info("🚀 [START] Retraining pipeline 시작 (limit=%d)", limit)

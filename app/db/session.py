@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from app.core.constants import psycopg_connection_uri, ASYNC_DB_URI  # DB 연결 URI (env에서 불러온 값)
 from app.core.logger import get_logger
 
-logger = get_logger("db.session")
+logger = get_logger("app.db.session")
 
 # =====================================================
 # 동기 엔진

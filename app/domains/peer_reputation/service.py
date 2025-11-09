@@ -13,7 +13,7 @@ from app.ml.sentiment.infer import SentimentModel
 from app.db.repository.peer_repository import PeerReputationRepository
 
 load_dotenv()
-logger = get_logger("peer_reputation_service")
+logger = get_logger("app.domanins.peer_reputation.service")
 
 
 class PeerReputationServiceAsync:

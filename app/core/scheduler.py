@@ -4,7 +4,7 @@ from datetime import datetime
 from app.ml.retrain.pipeline import run_retraining_pipeline
 from app.core.logger import get_logger
 
-logger = get_logger("scheduler")
+logger = get_logger("app.core.scheduler")
 
 scheduler = BackgroundScheduler(timezone="Asia/Seoul")
 

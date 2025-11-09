@@ -7,7 +7,7 @@ from peft import PeftModel
 from app.ml.retrain.manager import AdapterManager
 from app.core.logger import get_logger
 
-logger = get_logger("sentiment_infer")
+logger = get_logger("app.ml.sentiment.infer")
 
 # =====================================================
 # Dummy-safe decorator (핵심)
