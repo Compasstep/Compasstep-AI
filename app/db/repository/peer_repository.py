@@ -7,7 +7,7 @@ from sqlalchemy import text
 
 from app.core.logger import get_logger
 
-logger = get_logger("peer_reputation_repository")
+logger = get_logger("app.db.repository.peer_repository")
 
 
 class PeerReputationRepository:

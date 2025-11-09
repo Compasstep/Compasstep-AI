@@ -1,10 +1,11 @@
+# app/db/repository/youttube_reputation_repo.py
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 from typing import Dict, List
 from app.db.models.reputation_analysis import ReputationAnalysis
 from app.core.logger import get_logger
 
-logger = get_logger("youtube_reputation_repo")
+logger = get_logger("app.db.repository.youttube_reputation_repo")
 
 
 class YoutubeReputationRepository:

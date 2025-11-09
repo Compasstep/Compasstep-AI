@@ -1,3 +1,4 @@
+# app/db/repository/retraining_data.py
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import SQLAlchemyError
@@ -6,7 +7,7 @@ from typing import Dict, List
 from app.db.models.retraining_data import RetrainingData
 from app.core.logger import get_logger
 
-logger = get_logger("retraining_repo")
+logger = get_logger("app.db.repository.retraining_data")
 
 
 class RetrainingRepository:
