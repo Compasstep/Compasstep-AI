@@ -11,24 +11,21 @@ setup_logging()
 logger = get_logger("app.main")
 
 app = FastAPI(title="Compasstep FastAPI")
-app.include_router(chat_router)
-app.include_router(reputation_router)
-app.include_router(peer_router)
+
+routers = [
+    chat_router,
+    reputation_router,
+    peer_router
+]
+
+for r in routers:
+    app.include_router(r)
+
 
 
 @app.get("/healthcheck")
 def healthcheck():
     logger.info("Health Checked.")
-    return {"status": "active"}
-
-
-@app.get("/logger-test")
-def logger_test():
-    logger.info("Logger Test")
-    logger.debug("Logger Test")
-    logger.warning("Logger Test")
-    logger.error("Logger Test")
-    logger.critical("Logger Test")
     return {"status": "active"}
 
 @app.on_event("startup")
