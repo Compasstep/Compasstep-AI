@@ -4,6 +4,7 @@ from app.core.logger import setup_logging, get_logger
 from app.domains.reference.routers import chat_router
 from app.domains.reputation.routers import router as reputation_router
 from app.domains.peer_reputation.routers import router as peer_router
+from app.domains.lyrics.routers import router as lyrics_router
 from app.core.scheduler import start_scheduler
 
 
@@ -15,7 +16,8 @@ app = FastAPI(title="Compasstep FastAPI")
 routers = [
     chat_router,
     reputation_router,
-    peer_router
+    peer_router,
+    lyrics_router
 ]
 
 for r in routers:
