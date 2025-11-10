@@ -39,6 +39,7 @@ dependencies = [
     "apscheduler>=3.11.1",
     "boto3>=1.40.69",
     "pydantic-settings>=2.11.0",
+    "greenlet==3.0.3",
 ]
 
 [dependency-groups]

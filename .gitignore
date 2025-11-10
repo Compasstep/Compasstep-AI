@@ -228,3 +228,6 @@ docker-compose.yml
 
 #자동재학습으로 생긴 어댑터 관련
 app/model/
+
+model/
+app/nltk_data/
