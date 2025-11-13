@@ -31,21 +31,37 @@ class LyricsRepository:
         logger.info(f"lyrics 조회 완료 id={lyrics_id}, s3_key={s3_key}")
         return s3_key
 
-    # 2) 분석 결과 저장
+    # 2) 분석 결과 저장 (Upsert)
     @staticmethod
     async def save_analysis(db: AsyncSession, lyrics_id: int, analysis_result: dict) -> int:
         now = datetime.now()
 
-        record = LyricsAnalysis(
-            lyrics_id=lyrics_id,
-            analysis_result=analysis_result,
-            created_at=now,
-            updated_at=now
-        )
+        # 1) 기존 분석 여부 조회
+        query = select(LyricsAnalysis).where(LyricsAnalysis.lyrics_id == lyrics_id)
+        result = await db.execute(query)
+        record = result.scalar()
 
-        db.add(record)
+        # 2) 없으면 → INSERT
+        if not record:
+            new_record = LyricsAnalysis(
+                lyrics_id=lyrics_id,
+                analysis_result=analysis_result,
+                created_at=now,
+                updated_at=now
+            )
+            db.add(new_record)
+            await db.commit()
+            await db.refresh(new_record)
+
+            logger.info(f"가사 분석 INSERT 완료 (lyrics_id={lyrics_id}) → analysis_id={new_record.id}")
+            return new_record.id
+
+        # 3) 있으면 → UPDATE
+        record.analysis_result = analysis_result
+        record.updated_at = now
+
         await db.commit()
         await db.refresh(record)
 
-        logger.info(f"가사 분석 저장 완료 (lyrics_id={lyrics_id}) → analysis_id={record.id}")
+        logger.info(f"가사 분석 UPDATE 완료 (lyrics_id={lyrics_id}) → analysis_id={record.id}")
         return record.id
