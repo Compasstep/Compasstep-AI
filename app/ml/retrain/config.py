@@ -16,7 +16,7 @@ R_REGISTRY_PATH = R_MODEL_DIR / "registry.json"
 R_KOTE_TEST_PATH = R_TEST_DIR / "kote_test_L1L0.csv"
 R_GOE_TEST_PATH = R_TEST_DIR / "goe_test_L1L0.csv"
 
-# ✅ L1 매핑은 프로젝트 루트에 존재
+# L1 매핑은 프로젝트 루트에 존재
 R_L1_MAP_PATH = PROJECT_ROOT / "L1_id_map.json"
 
 # ---------- 베이스 모델 경로 (.env 권장) ----------

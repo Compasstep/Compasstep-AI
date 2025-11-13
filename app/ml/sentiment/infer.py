@@ -27,12 +27,12 @@ _USE_DUMMY = False
 try:
     import torch  # type: ignore
     from transformers import AutoTokenizer, AutoModelForSequenceClassification  # type: ignore
-    #raise ImportError("🔥 Forced import failure for testing Dummy mode") #더미 실행원하면 활성화
+    #raise ImportError("Forced import failure for testing Dummy mode") #더미 실행원하면 활성화
 
 except Exception:
     _USE_DUMMY = True
     torch = None
-    logger.warning("[SentimentModel] ⚠️ transformers/torch not available. Running in DUMMY mode.")
+    logger.warning("[SentimentModel] transformers/torch not available. Running in DUMMY mode.")
 
 # =====================================================
 # ② L1 라벨 로드
@@ -125,13 +125,13 @@ class SentimentModel:
         self.device = device
 
         if self.use_dummy:
-            logger.warning("[SentimentModel] ⚠️ Using DUMMY predictions (no torch).")
+            logger.warning("[SentimentModel] Using DUMMY predictions (no torch).")
             self.model = None
             self.tokenizer = None
             return
 
-        logger.info("[SentimentModel] 🚀 Loading model from %s", model_name_or_path)
-        logger.info("[SentimentModel] 🧠 Using device: %s", self.device)
+        logger.info("[SentimentModel] Loading model from %s", model_name_or_path)
+        logger.info("[SentimentModel] Using device: %s", self.device)
 
         # --------------------------
         # 3) 모델 로드
@@ -144,16 +144,16 @@ class SentimentModel:
         # --------------------------
         # 4) LoRA 어댑터 병합 시도
         # --------------------------
-        active_adapter = self._get_active_adapter_path()  # ✅ 새로 추가된 함수
+        active_adapter = self._get_active_adapter_path()  # 새로 추가된 함수
         if active_adapter:
-            logger.info("[SentimentModel] 🔗 Merging active LoRA adapter: %s", active_adapter)
+            logger.info("[SentimentModel] Merging active LoRA adapter: %s", active_adapter)
             try:
                 base_model = PeftModel.from_pretrained(base_model, active_adapter)
-                logger.info("[SentimentModel] ✅ LoRA adapter loaded successfully.")
+                logger.info("[SentimentModel] LoRA adapter loaded successfully.")
             except Exception as e:
-                logger.error("[SentimentModel] ⚠️ Failed to load adapter. Using base model only.", exc_info=True)
+                logger.error("[SentimentModel] Failed to load adapter. Using base model only.", exc_info=True)
         else:
-            logger.info("[SentimentModel] ℹ️ No active adapter found, using base model only.")
+            logger.info("[SentimentModel] No active adapter found, using base model only.")
 
         self.model = base_model.to(self.device)
         self.model.eval()
@@ -167,12 +167,12 @@ class SentimentModel:
             manager = AdapterManager()
             active = manager.get_active_adapter()
             if active:
-                logger.info("[SentimentModel] 🔗 Active adapter found: %s", active)
+                logger.info("[SentimentModel] Active adapter found: %s", active)
             else:
-                logger.warning("[SentimentModel] ⚠️ No active adapter registered — using base model only.")
+                logger.warning("[SentimentModel] No active adapter registered — using base model only.")
             return active
         except Exception as e:
-            logger.error("[SentimentModel] ⚠️ Adapter lookup failed", exc_info=True)
+            logger.error("[SentimentModel] Adapter lookup failed", exc_info=True)
             return None
 
     # =====================================================

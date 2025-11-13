@@ -14,6 +14,8 @@ from nltk.stem import WordNetLemmatizer
 # ---------------------------------------------------------
 okt = Okt()
 lemmatizer = WordNetLemmatizer()
+nltk.data.path.append(r"C:\Users\james\AppData\Roaming\nltk_data")
+
 
 # NLTK 리소스 (최초 1회만 다운로드 필요)
 # uv run python -m nltk.downloader punkt averaged_perceptron_tagger wordnet
