@@ -5,11 +5,14 @@ from app.db.session import get_async_db
 from app.domains.reputation.schemas import YoutubeReputationRequest, ErrorResponse
 from app.domains.reputation.service import YoutubeReputationServiceAsync
 from app.core.logger import setup_logging, get_logger
+from app.ml.sentiment.infer import SENTIMENT_MODEL
 
 router = APIRouter(prefix="/ai/user/analyze", tags=["Reputation / YouTube"])
 
+service_singleton = YoutubeReputationServiceAsync(SENTIMENT_MODEL)
+
 def get_service():
-    return YoutubeReputationServiceAsync()
+    return service_singleton
 
 @router.post("/youtube", response_model=dict, responses={400: {"model": ErrorResponse}, 404: {"model": ErrorResponse}})
 async def analyze_youtube_reputation(

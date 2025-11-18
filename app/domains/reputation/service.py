@@ -28,8 +28,8 @@ CONF_THRESHOLD = 0.5
 # 🧠 메인 서비스 클래스
 # ---------------------------------------------------------------------------
 class YoutubeReputationServiceAsync:
-    def __init__(self):
-        self.model = SentimentModel(os.getenv("SENTIMENT_MODEL_PATH"))
+    def __init__(self, model):
+        self.model = model
         self.executor = ThreadPoolExecutor(max_workers=2)
         self.youtube_api_key = os.getenv("YOUTUBE_API_KEY")
 

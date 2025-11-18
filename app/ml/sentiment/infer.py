@@ -223,3 +223,10 @@ class SentimentModel:
                 p[pol] = 1.0
                 results.append({"emotions": emo_probs, "polarity": p})
         return results
+
+
+# =====================================================
+# 🔥 전역 싱글턴 SentimentModel (서버 시작 시 1회 로딩)
+# =====================================================
+
+SENTIMENT_MODEL = SentimentModel(os.getenv("SENTIMENT_MODEL_PATH"))

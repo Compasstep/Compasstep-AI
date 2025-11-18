@@ -5,6 +5,7 @@ from app.db.session import get_async_db
 from app.domains.peer_reputation.schemas import PeerReputationRequest, ErrorResponse
 from app.domains.peer_reputation.service import PeerReputationServiceAsync
 from app.core.logger import setup_logging, get_logger
+from app.ml.sentiment.infer import SENTIMENT_MODEL
 
 
 router = APIRouter(prefix="/ai/user/analyze", tags=["Reputation / Peer"])
@@ -12,8 +13,11 @@ router = APIRouter(prefix="/ai/user/analyze", tags=["Reputation / Peer"])
 # ----------------------------------------------------------------------
 # 🧠 서비스 의존성 주입
 # ----------------------------------------------------------------------
+service_singleton = PeerReputationServiceAsync(SENTIMENT_MODEL)
+
 def get_service():
-    return PeerReputationServiceAsync()
+    # 매 요청 때마다 같은 인스턴스를 리턴한다
+    return service_singleton
 
 
 # ----------------------------------------------------------------------

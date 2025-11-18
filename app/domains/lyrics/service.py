@@ -10,8 +10,8 @@ from app.core.logger import get_logger
 logger = get_logger("app.domains.lyrics.service")
 
 class LyricsService:
-    def __init__(self):
-        self.reputation = LyricsReputationService()
+    def __init__(self, model):
+        self.reputation = LyricsReputationService(model)
 
     async def analyze_and_save(self, db: AsyncSession, lyrics_id: int) -> Dict[str, Any]:
         """

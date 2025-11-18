@@ -6,15 +6,18 @@ from app.db.session import get_async_db
 from app.domains.lyrics.schemas import LyricsAnalyzeRequest, ErrorResponse, ApiResponse
 from app.domains.lyrics.service import LyricsService
 from app.core.logger import get_logger
+from app.ml.sentiment.infer import SENTIMENT_MODEL
 
 logger = get_logger("app.domain.lyrics.routers")
 
 router = APIRouter(prefix="/ai/user/analyze", tags=["Reputation / Lyrics"])
 
+service_singleton = LyricsService(SENTIMENT_MODEL)
+
 
 # ✅ 서비스 주입 방식 통일
 def get_service():
-    return LyricsService()
+    return service_singleton
 
 
 @router.post(

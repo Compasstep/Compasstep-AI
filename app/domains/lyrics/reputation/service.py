@@ -7,9 +7,9 @@ from app.core.logger import get_logger
 logger = get_logger("app.domain.lyrics.reputation.service")
 
 class LyricsReputationService:
-    def __init__(self):
+    def __init__(self, model):
         self.s3 = S3Service()
-        self.sentiment_model = SentimentModel()
+        self.sentiment_model = model
 
     async def analyze_lyrics(self, object_key: str):
         """

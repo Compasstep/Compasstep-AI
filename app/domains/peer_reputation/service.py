@@ -9,8 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logger import get_logger
 from app.ml.sentiment.keywords import extract_keywords_mixed
-from app.ml.sentiment.infer import SentimentModel
 from app.db.repository.peer_repository import PeerReputationRepository
+from app.ml.sentiment.infer import SENTIMENT_MODEL  # ⬅ 전역 싱글턴 모델 import
 
 load_dotenv()
 logger = get_logger("app.domanins.peer_reputation.service")
@@ -18,9 +18,8 @@ logger = get_logger("app.domanins.peer_reputation.service")
 
 class PeerReputationServiceAsync:
     """🧠 지인 평판 분석 서비스"""
-
-    def __init__(self):
-        self.model = SentimentModel(os.getenv("SENTIMENT_MODEL_PATH"))
+    def __init__(self, model):
+        self.model = model
         self.executor = ThreadPoolExecutor(max_workers=2)
         self.repo = PeerReputationRepository()
 
