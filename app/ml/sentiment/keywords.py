@@ -5,22 +5,12 @@ from collections import Counter
 from typing import List
 
 from konlpy.tag import Okt
-import nltk
-from nltk import pos_tag, word_tokenize
-from nltk.stem import WordNetLemmatizer
+import simplemma
 
 # ---------------------------------------------------------
 # 🧩 초기 세팅, 한국어 영어 통합 불용어 사전 로드
 # ---------------------------------------------------------
 okt = Okt()
-lemmatizer = WordNetLemmatizer()
-nltk.data.path.append(r"C:\Users\james\AppData\Roaming\nltk_data")
-
-
-# NLTK 리소스 (최초 1회만 다운로드 필요)
-# uv run python -m nltk.downloader punkt averaged_perceptron_tagger wordnet
-# 또는 파이썬 콘솔에서 직접 실행:
-# import nltk; nltk.download("punkt"); nltk.download("averaged_perceptron_tagger"); nltk.download("wordnet")
 
 STOPWORDS_PATH = Path(__file__).resolve().parent / "stopwords.txt"
 STOPWORDS = set()
@@ -44,8 +34,20 @@ def normalize_text(text: str) -> str:
 
 
 # ---------------------------------------------------------
-# 🇰🇷 한국어 명사 + 🇺🇸 영어 (POS + Lemma) 혼합 키워드 추출
+# 🇰🇷 한국어 명사 + 🇺🇸 영어 (Lemma) 혼합 키워드 추출
 # ---------------------------------------------------------
+JOSA = [
+    "은", "는", "이", "가", "을", "를", "도", "만",
+    "와", "과", "로", "으로", "에", "에서", "에게",
+    "처럼", "까지", "부터", "조차", "라도"
+]
+
+def strip_josa(word: str) -> str:
+    for j in JOSA:
+        if word.endswith(j) and len(word) > len(j):
+            return word[:-len(j)]
+    return word
+
 def extract_keywords_mixed(texts: List[str], top_k: int = 20) -> List[str]:
     tokens = []
 
@@ -54,22 +56,30 @@ def extract_keywords_mixed(texts: List[str], top_k: int = 20) -> List[str]:
 
         # ① 한국어 명사 추출
         ko_nouns = [
-            w for w in okt.nouns(t)
+            strip_josa(w)
+            for w in okt.nouns(t)
             if len(w) > 1 and w not in STOPWORDS
         ]
-
-        # ② 영어 키워드 추출 (품사 + 원형화)
-        words = word_tokenize(t)
-        tagged = pos_tag(words)
-        en_words = [
-            lemmatizer.lemmatize(w.lower())
-            for (w, pos) in tagged
-            if pos.startswith(("N", "J"))  # 명사(N), 형용사(J)만
-            and len(w) > 2
-            and w.lower() not in STOPWORDS
+        # ① 한국어 형용사 추출
+        ko_adjs = [
+            w
+            for (w, pos) in okt.pos(t)
+            if pos == "Adjective" and len(w) > 1 and w not in STOPWORDS
         ]
 
-        tokens.extend(ko_nouns + en_words)
+        ko_tokens = ko_nouns + ko_adjs
+
+        # ② 영어 단어 정규식 추출
+        en_raw = re.findall(r"[A-Za-z]+", t)
+
+        # ③ 영어 단어 lemmatize + 소문자 + stopword 제거
+        en_words = [
+            simplemma.lemmatize(w.lower(), "en")
+            for w in en_raw
+            if len(w) > 2 and w.lower() not in STOPWORDS
+        ]
+
+        tokens.extend(ko_tokens + en_words)
 
     freq = Counter(tokens)
     return [k for k, _ in freq.most_common(top_k)]
